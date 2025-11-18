@@ -1,36 +1,148 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Cyfalytics.io — Real-Time AI Analytics Dashboard
+A modern, real-time analytics dashboard built with Next.js 14 (App Router), TailwindCSS, Recharts, and Clerk Authentication. Designed for Nigerian gadget stores, but adaptable to any business.
+🌟 Overview
+Cyfalytics.io is a fully responsive, AI-powered analytics dashboard that delivers:
 
-## Getting Started
+📊 Real-time sales + revenue analytics (updates every 10 seconds)
+🔄 Dynamic charts (Category Revenue, Sales Trend, Region Revenue)
+📥 CSV Export (with timestamps)
+🌙 Dark/Light Mode
+📱 Fully responsive UI for all screens
+🔐 Auth system using Clerk
+🤖 AI Insights page (powered by OpenAI)
+⚡ Zero database — data generated through API + client-side polling
+🎨 Clean, modern UI with smooth interactions
 
-First, run the development server:
+Perfect for showcasing dashboard engineering, frontend architecture, real-time systems, and clean UI/UX skills to recruiters.
 
-```bash
+🖼️ Live Demo
+🚀 Live Website: https://your-app.vercel.app/
+📦 GitHub Repo: https://github.com/YOUR-USERNAME/cyfalytics-dashboard
+
+🛠️ Tech Stack
+Frontend
+
+Next.js 14 (App Router)
+React (with Hooks)
+TailwindCSS
+Recharts
+Framer Motion
+Clerk Auth
+
+Backend (Inside Next.js)
+
+REST API routes for dynamic data generation
+Mock data generator (Node)
+
+AI
+
+OpenAI API for AI Insights page
+
+
+⚡ Real-Time Architecture (Polling-Based)
+This project simulates live analytics using client-side polling with a 10-second refresh interval.
+Why Polling?
+
+✅ Simple to implement — no complex WebSocket/SSE setup
+✅ Reliable — works everywhere (no connection persistence issues)
+✅ Efficient for 10s intervals — perfectly acceptable for dashboard use cases
+✅ Easy to debug — standard HTTP requests
+
+How it works
+
+User opens the dashboard
+useEffect hook triggers initial data fetch
+setInterval calls the API every 10 seconds:
+
+typescriptuseEffect(() => {
+  setMounted(true);
+  fetchData();
+  const interval = setInterval(fetchData, 10000); // 10 seconds
+  return () => clearInterval(interval);
+}, []);
+
+Charts update automatically with fresh data
+No page refresh needed — feels real-time!
+
+
+📊 Key Features
+🔥 1. Real-Time Charts
+Sales Trend (Jan → Current Month)
+
+Automatically generates data up to today's month
+Updates every 10 seconds
+Scrollable on small screens
+
+Revenue by Category
+
+Power Banks
+Airpods
+Smart Watches
+Phones
+Laptops
+Accessories
+etc.
+
+Region Revenue (Lagos vs Abuja)
+Dynamic weights simulate realistic regional differences.
+
+📥 2. CSV Export
+Every chart can export CSV with:
+
+Timestamp (date + time)
+Source (sales/category/region)
+Raw data values
+
+Example:
+csvexported_at,category,revenue
+2025-01-06 14:32,Phones,120000000
+2025-01-06 14:32,Laptops,98000000
+
+🌙 3. Dark Mode + Clean UI
+The entire dashboard is optimized for:
+
+Smooth animations
+Mobile friendliness
+Elegant spacing
+System theme preference
+
+
+🔐 4. Authentication with Clerk
+Sign in/out flows out of the box.
+
+🤖 5. AI Insights Page
+Uses OpenAI API to summarize metrics & answer business questions.
+Examples:
+
+"Why did sales drop in June?"
+"Predict Lagos vs Abuja revenue for next quarter."
+
+
+📡 API Routes
+RouteMethodDescription/api/salesGETFetch current sales data/api/categoryGETFetch category revenue breakdown/api/regionGETFetch region-based revenue/api/chatPOSTAI Insights (OpenAI)/api/export/csvPOSTCSV export
+
+🧱 Project Structure
+src/
+ ├─ app/
+ │   ├─ dashboard/
+ │   │   ├─ charts/
+ │   │   ├─ layout.tsx
+ │   │   ├─ page.tsx
+ │   ├─ api/
+ │   │   ├─ sales/route.ts
+ │   │   ├─ category/route.ts
+ │   │   ├─ region/route.ts
+ │   │   ├─ chat/route.ts
+ │   │   ├─ export/csv/route.ts
+ │   ├─ layout.tsx
+ │   ├─ page.tsx
+ ├─ components/
+ ├─ lib/
+ ├─ styles/
+
+🧪 Running Locally
+bashgit clone https://github.com/YOUR-USERNAME/cyfalytics-dashboard
+cd cyfalytics-dashboard
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open 👉 http://localhost:3000
