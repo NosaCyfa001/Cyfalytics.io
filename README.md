@@ -13,12 +13,6 @@ Cyfalytics.io is a fully responsive, AI-powered analytics dashboard that deliver
 ⚡ Zero database — data generated through API + client-side polling
 🎨 Clean, modern UI with smooth interactions
 
-Perfect for showcasing dashboard engineering, frontend architecture, real-time systems, and clean UI/UX skills to recruiters.
-
-🖼️ Live Demo
-🚀 Live Website: https://your-app.vercel.app/
-📦 GitHub Repo: https://github.com/YOUR-USERNAME/cyfalytics-dashboard
-
 🛠️ Tech Stack
 Frontend
 
