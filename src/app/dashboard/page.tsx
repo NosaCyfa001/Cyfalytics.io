@@ -8,13 +8,9 @@ import {
   Users,
   Package,
   RefreshCw,
-  ArrowUpRight,
-  ArrowDownRight,
 } from "lucide-react";
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
   LineChart,
   Line,
   XAxis,

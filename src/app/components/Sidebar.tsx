@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, BarChart, Bot, Settings, X, HomeIcon } from "lucide-react";
+import { LayoutDashboard, BarChart, Bot, Settings, X } from "lucide-react";
 import Link from "next/link";
 
 interface SidebarProps {
