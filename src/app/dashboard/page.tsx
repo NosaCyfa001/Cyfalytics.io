@@ -45,20 +45,26 @@ interface Transaction {
   amount: number;
   customer: string;
   status: "paid" | "pending" | "refunded";
-  // Assuming the upgraded API now includes 'product' and 'paymentMethod'
   product?: string;
   paymentMethod?: string;
 }
 
 // Recharts Tooltip Payload Types
 interface TooltipPayload {
-  active: boolean;
-  payload: Array<{
+  active?: boolean;
+  payload?: Array<{
     value: number | string;
     name: string;
     color: string;
   }>;
-  label: string;
+  label?: string;
+}
+
+interface MonthlyDataPoint {
+  month: string;
+  revenue: number;
+  sales: number;
+  customers: number;
 }
 
 // --- END TYPE DEFINITIONS ---
@@ -137,9 +143,10 @@ export default function DashboardPage() {
       // Ensure transactions array exists in the API response structure
       setTransactions(transactionsJson.transactions || []);
       setLoading(false);
-    } catch (err: any) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
       console.error("Error fetching data:", err);
-      setError(err.message || "An unknown error occurred.");
+      setError(errorMessage);
       setLoading(false);
     } finally {
       setRefreshing(false);
@@ -147,7 +154,7 @@ export default function DashboardPage() {
   };
 
   // Generate data from Jan to current month
-  const generateMonthlyData = () => {
+  const generateMonthlyData = (): MonthlyDataPoint[] => {
     const months = [
       "Jan",
       "Feb",
@@ -183,36 +190,18 @@ export default function DashboardPage() {
   };
 
   const monthlyData = generateMonthlyData();
-  const formatNaira = (value: number) => `₦${(value / 1_000_000).toFixed(1)}M`;
-
-  // Custom Tooltip for the Revenue Chart
-  const CustomTooltip = ({ active, payload, label }: TooltipPayload) => {
-    if (active && payload?.length) {
-      return (
-        <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            {label}
-          </p>
-          <p className="text-sm text-blue-600 dark:text-blue-400">
-            Revenue: ₦{payload[0].value.toLocaleString()}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   // Custom Tooltip for the Sales vs Customers Chart
   const CustomMultiTooltip = ({ active, payload, label }: TooltipPayload) => {
-    if (active && payload?.length) {
+    if (active && payload && payload.length) {
       return (
         <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
             {label}
           </p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.value.toLocaleString()}
+              {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}
             </p>
           ))}
         </div>
@@ -235,7 +224,6 @@ export default function DashboardPage() {
   };
 
   if (!mounted || loading) {
-    // ✅ FIX: Using the upgraded Skeleton Screen for better UX
     return <DashboardPageSkeleton />;
   }
 
@@ -392,8 +380,6 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
             <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-              {" "}
-              {/* Added max-height and scroll */}
               {transactions.slice(0, 10).map((txn) => (
                 <div
                   key={txn.id}
@@ -443,15 +429,7 @@ export default function DashboardPage() {
                     style={{ fontSize: "12px" }}
                   />
                   <YAxis stroke="#9ca3af" style={{ fontSize: "12px" }} />
-                  <Tooltip
-                    content={
-                      <CustomMultiTooltip
-                        active={false}
-                        payload={[]}
-                        label={""}
-                      />
-                    }
-                  />
+                  <Tooltip content={<CustomMultiTooltip />} />
                   <Legend wrapperStyle={{ fontSize: "12px" }} />
                   <Line
                     type="monotone"

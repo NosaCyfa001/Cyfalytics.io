@@ -8,7 +8,7 @@ import { RegionalSalesTable } from "./RegionalSalesTable";
 interface RegionalData {
   name: string;
   value: number;
-  [key: string]: any;
+  [key: string]: string | number;
 }
 
 interface PieTooltipProps {
