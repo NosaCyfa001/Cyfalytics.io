@@ -1,4 +1,4 @@
-export async function GET() {
+/*export async function GET() {
   const encoder = new TextEncoder();
 
   return new Response(
@@ -63,4 +63,4 @@ export async function GET() {
       },
     }
   );
-}
+}*/

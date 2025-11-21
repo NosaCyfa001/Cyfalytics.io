@@ -33,6 +33,11 @@ type SalesData = {
   timestamp: string;
 };
 
+interface PieLabelProps {
+  name?: string;
+  percent?: number;
+}
+
 const POLL_INTERVAL_MS = 10_000; // 10s
 
 export default function SalesPage(): JSX.Element {
@@ -56,7 +61,6 @@ export default function SalesPage(): JSX.Element {
       setSalesData(data);
       setLoading(false);
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error("fetchSales error:", err);
       setLoading(false);
     }
@@ -78,7 +82,6 @@ export default function SalesPage(): JSX.Element {
       }
       setBestCategory("N/A");
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error("fetchBestCategory error:", err);
       setBestCategory("N/A");
     }
@@ -230,9 +233,9 @@ export default function SalesPage(): JSX.Element {
                     cy="50%"
                     outerRadius={80}
                     dataKey="value"
-                    label={(entry) => {
-                      const name = (entry as any)?.name ?? "Unknown";
-                      const percent = typeof (entry as any)?.percent === "number" ? ((entry as any).percent * 100).toFixed(0) : "0";
+                    label={(entry: PieLabelProps) => {
+                      const name = entry?.name ?? "Unknown";
+                      const percent = typeof entry?.percent === "number" ? (entry.percent * 100).toFixed(0) : "0";
                       return `${name} ${percent}%`;
                     }}
                   >

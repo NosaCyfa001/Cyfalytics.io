@@ -1,4 +1,3 @@
-// CategoryRevenueChart.tsx - With CSV Export Only
 "use client";
 
 import { useEffect, useState } from "react";
@@ -14,8 +13,21 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RefreshCw, Download } from "lucide-react";
 
+interface CategoryData {
+  category: string;
+  revenue: number;
+}
+
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+    payload: CategoryData;
+  }>;
+}
+
 export function CategoryRevenueChart() {
-  const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
@@ -88,7 +100,7 @@ export function CategoryRevenueChart() {
     document.body.removeChild(link);
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
