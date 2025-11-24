@@ -44,8 +44,6 @@ export function SalesTrendChart(): JSX.Element {
       setSalesTrend(filtered);
       setLastUpdated(new Date());
     } catch (err) {
-      // keep UX friendly: console + retain old data
-      // eslint-disable-next-line no-console
       console.error("fetchSalesTrend error:", err);
     } finally {
       setLoading(false);
@@ -56,8 +54,6 @@ export function SalesTrendChart(): JSX.Element {
     fetchSalesTrend();
     const id = setInterval(fetchSalesTrend, POLL_INTERVAL_MS);
     return () => clearInterval(id);
-    // intentionally no deps: we mount once and poll
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalSales = salesTrend.reduce((sum, s) => sum + (s.sales ?? 0), 0);

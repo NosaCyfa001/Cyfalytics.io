@@ -10,27 +10,9 @@ import {
   Legend,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
-import { useMemo } from "react";
 import { dashboardChartData } from "@/app/data/mockData";
 
 export function TrafficChart() {
-  // ✅ Dynamically generate months (Jan → current month)
-  const months = useMemo(() => {
-    const now = new Date();
-    const monthNames = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ];
-    return monthNames.slice(0, now.getMonth() + 1);
-  }, []);
-
-  // ✅ Generate mock data for each month
-  const data = months.map((month, i) => ({
-    month,
-    sales: 300 + Math.floor(Math.random() * 300),
-    customers: 200 + Math.floor(Math.random() * 200),
-  }));
-
   return (
     <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm">
       <CardContent className="p-6">

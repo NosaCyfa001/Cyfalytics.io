@@ -35,7 +35,7 @@ export function RevenueChart() {
   }, []);
 
   // ✅ Simulated data (₦100M - ₦400M)
-  const data = months.map((month, i) => ({
+  const data = months.map((month) => ({
     month,
     revenue: 100_000_000 + Math.floor(Math.random() * 300_000_000),
   }));
