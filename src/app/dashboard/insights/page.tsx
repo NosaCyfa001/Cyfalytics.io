@@ -83,9 +83,9 @@ export default function InsightsPage() {
       if (!res.ok) {
         const errorData = await res.json();
 
-        // Fallback to mock responses if OpenAI quota exceeded
-        if (res.status === 429) {
-          console.log("⚠️ Using fallback mock response due to quota limit");
+        // Fallback to mock responses if API fails
+        if (res.status === 429 || res.status === 500) {
+          console.log("⚠️ Using fallback mock response");
           const mockResponses = [
             "Based on your sales data, I've noticed a 23% increase this week. Customer engagement peaks on weekends, particularly on Saturdays. I recommend increasing ad spend on Fridays to maximize weekend conversions.",
             "Your conversion rate has improved by 4.7% this month. The majority of conversions happen between 2-5 PM. Consider scheduling promotional campaigns during these peak hours.",
@@ -111,15 +111,14 @@ export default function InsightsPage() {
       console.log("✅ AI Reply:", data.reply);
 
       setMessages((prev) => [...prev, { role: "ai", content: data.reply }]);
-    } catch (error: any) {
-      console.error("❌ Frontend error:", error);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong. Please try again.";
+      console.error("❌ Frontend error:", errorMessage);
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          content: `Sorry, I encountered an error: ${
-            error.message || "Something went wrong. Please try again."
-          }`,
+          content: `Sorry, I encountered an error: ${errorMessage}`,
         },
       ]);
     } finally {

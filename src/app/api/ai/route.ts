@@ -5,12 +5,23 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// ---- Types ---- //
+interface AIRequestBody {
+  message: string;
+}
+
+interface OpenAIError extends Error {
+  code?: string;
+}
+
 export async function POST(req: Request) {
-  console.log("🚀 AI API route hit"); // Debug log
+  console.log("🚀 AI API route hit");
 
   try {
-    const { message } = await req.json();
-    console.log("📝 User message:", message); // Debug log
+    const body: AIRequestBody = await req.json();
+    const { message } = body;
+
+    console.log("📝 User message:", message);
 
     if (!process.env.OPENAI_API_KEY) {
       console.error("❌ OPENAI_API_KEY is missing");
@@ -21,6 +32,7 @@ export async function POST(req: Request) {
     }
 
     console.log("🤖 Calling OpenAI...");
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -38,23 +50,26 @@ export async function POST(req: Request) {
       temperature: 0.7,
     });
 
-    const aiResponse = completion.choices[0].message?.content || "No response generated";
-    console.log("✅ AI Response:", aiResponse); // Debug log
+    const aiResponse =
+      completion.choices[0].message?.content ?? "No response generated";
+
+    console.log("✅ AI Response:", aiResponse);
 
     return NextResponse.json({ reply: aiResponse });
-  } catch (error: any) {
+  } catch (err) {
+    const error = err as OpenAIError;
+
     console.error("❌ AI error:", error);
     console.error("Error details:", error.message);
-    
-    // More specific error messages
-    if (error.code === 'insufficient_quota') {
+
+    if (error.code === "insufficient_quota") {
       return NextResponse.json(
         { error: "OpenAI API quota exceeded. Please check your billing." },
         { status: 429 }
       );
     }
-    
-    if (error.code === 'invalid_api_key') {
+
+    if (error.code === "invalid_api_key") {
       return NextResponse.json(
         { error: "Invalid OpenAI API key" },
         { status: 401 }
