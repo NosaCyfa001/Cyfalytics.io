@@ -1,10 +1,22 @@
-/*export async function GET() {
+interface StreamData {
+  type: string;
+  monthlyRevenue?: Array<{ month: string; revenue: number }>;
+  categoryRevenue?: Array<{ category: string; amount: number }>;
+  stats?: {
+    orders: number;
+    customers: number;
+    refunds: number;
+    revenueToday: number;
+  };
+}
+
+export async function GET() {
   const encoder = new TextEncoder();
 
   return new Response(
     new ReadableStream({
       start(controller) {
-        function send(data: any) {
+        function send(data: StreamData) {
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify(data)}\n\n`)
           );
@@ -63,4 +75,4 @@
       },
     }
   );
-}*/
+}
