@@ -13,6 +13,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Download } from "lucide-react";
 import { useMemo } from "react";
 
+// Define types for tooltip props
+interface TooltipPayload {
+  value: number;
+  // other properties if needed
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+  label?: string;
+}
+
 export function RevenueChart() {
   const months = useMemo(() => {
     const now = new Date();
@@ -56,8 +68,7 @@ export function RevenueChart() {
     document.body.removeChild(link);
   };
 
-  // Custom Tooltip component for clean display
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       const revenue = payload[0].value;
       return (
