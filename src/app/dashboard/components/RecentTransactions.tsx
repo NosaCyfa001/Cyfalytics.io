@@ -27,7 +27,7 @@ export function RecentTransactions() {
   useEffect(() => setMounted(true), []);
 
   const transactions: Transaction[] = [
-    { id: "TXN-001", customer: "John Doe", amount: 48000, status: "Completed", date: "Oct 9, 2025" },
+    { id: "TXN-001", customer: "John kir", amount: 48000, status: "Completed", date: "Oct 9, 2025" },
     { id: "TXN-002", customer: "Sarah Johnson", amount: 32000, status: "Pending", date: "Oct 10, 2025" },
     { id: "TXN-003", customer: "Michael Lee", amount: 76000, status: "Completed", date: "Oct 11, 2025" },
     { id: "TXN-004", customer: "Jane Smith", amount: 15000, status: "Failed", date: "Oct 11, 2025" },

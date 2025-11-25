@@ -322,7 +322,7 @@ export default function DashboardPage() {
       {salesData && (
         <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
           <CardContent className="p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
               Regional Performance
             </h2>
             <div className="space-y-3 sm:space-y-4">
@@ -415,7 +415,7 @@ export default function DashboardPage() {
       {/* Sales vs Customers */}
       <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
         <CardContent className="p-4 sm:p-6">
-          <h2 className="text-base sm:text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
             Sales vs Active Customers
           </h2>
           <div className="h-64 sm:h-72 overflow-x-auto">

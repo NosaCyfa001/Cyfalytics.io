@@ -125,8 +125,7 @@ export function SalesTrendChart(): JSX.Element {
   return (
     <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
       <CardHeader className="border-b border-gray-200 dark:border-gray-700 pb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Monthly Sales Trend</h2>
-
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Monthly Sales Trend</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={downloadCSV}
@@ -176,17 +175,6 @@ export function SalesTrendChart(): JSX.Element {
                 <Area type="monotone" dataKey="sales" stroke="#3b82f6" strokeWidth={3} fill="url(#colorSales)" dot={{ r: 3 }} activeDot={{ r: 6 }} />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-wrap justify-between gap-4 text-sm">
-          <div>
-            <p className="text-gray-500 dark:text-gray-400">Total Sales (YTD)</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">₦{totalSales.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 dark:text-gray-400">Average Monthly</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(avgSales)}</p>
           </div>
         </div>
       </CardContent>

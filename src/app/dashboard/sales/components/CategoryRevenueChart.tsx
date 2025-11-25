@@ -119,7 +119,7 @@ export function CategoryRevenueChart() {
   return (
     <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
       <CardHeader className="border-b border-gray-200 dark:border-gray-700 pb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
           Revenue by Category
         </h2>
         <div className="flex items-center gap-2">
