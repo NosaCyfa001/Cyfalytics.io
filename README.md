@@ -136,7 +136,7 @@ src/
 
 🧪 Running Locally
 bash.. git clone https://cyfalytics-io-rqg5.vercel.app/
-cd cyfalytics-dashboard
+cd cyfalytics
 npm install
 npm run dev
 Open 👉 http://localhost:3000
