@@ -135,7 +135,7 @@ src/
  ├─ styles/
 
 🧪 Running Locally
-bashgit clone https://github.com/YOUR-USERNAME/cyfalytics-dashboard
+bash.. git clone https://cyfalytics-io-rqg5.vercel.app/
 cd cyfalytics-dashboard
 npm install
 npm run dev
