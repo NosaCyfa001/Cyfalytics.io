@@ -142,7 +142,7 @@ export default function InsightsPage() {
   const activeUsers = salesData?.summary.totalOrders || 0;
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
         <div>
@@ -177,7 +177,7 @@ export default function InsightsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           {
             title: "Revenue Growth",
@@ -206,23 +206,23 @@ export default function InsightsPage() {
         ].map((item, index) => (
           <motion.div
             key={item.title}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.08 }}
           >
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-3 sm:p-5">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-shadow h-full">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                   <div
                     className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-br ${item.color}`}
                   >
                     <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                   </div>
                 </div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-0.5 sm:mb-1">
+                <p className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-0.5">
                   {item.value}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">
                   {item.title}
                 </p>
               </CardContent>
@@ -349,7 +349,13 @@ export default function InsightsPage() {
 
           {/* Input Area */}
           <div className="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4">
-            <div className="flex gap-2">
+            <form
+              className="flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAskAI(e);
+              }}
+            >
               <input
                 type="text"
                 value={input}
@@ -365,16 +371,17 @@ export default function InsightsPage() {
                 disabled={loading}
               />
               <button
-                type="button"
-                onClick={handleAskAI}
+                type="submit"
                 disabled={loading || !input.trim()}
                 className="px-3 sm:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 sm:gap-2 min-w-[44px] shrink-0"
                 aria-label="Send message"
               >
                 <Send className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm whitespace-nowrap">Send</span>
+                <span className="hidden sm:inline text-sm whitespace-nowrap">
+                  Send
+                </span>
               </button>
-            </div>
+            </form>
           </div>
         </CardContent>
       </Card>
