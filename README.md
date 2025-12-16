@@ -1,142 +1,183 @@
-Cyfalytics.io — Real-Time AI Analytics Dashboard
-A modern, real-time analytics dashboard built with Next.js 14 (App Router), TailwindCSS, Recharts, and Clerk Authentication. Designed for Nigerian gadget stores, but adaptable to any business.
-🌟 Overview
-Cyfalytics.io is a fully responsive, AI-powered analytics dashboard that delivers:
+🚀 Cyfalytics.io — Real-Time AI Analytics Dashboard
 
-📊 Real-time sales + revenue analytics (updates every 10 seconds)
-🔄 Dynamic charts (Category Revenue, Sales Trend, Region Revenue)
+A modern, high-performance analytics dashboard built with Next.js 14, TailwindCSS, Recharts, Clerk Auth, and OpenAI AI Insights.
+Designed originally for Nigerian gadget retailers, but fully adaptable to any business.
+
+Cyfalytics.io delivers beautiful charts, real-time data simulation, AI-powered insights, CSV exporting, and a clean, responsive UI.
+
+✨ Features
+📊 Real-Time Analytics (10-second polling)
+
+Sales trend chart (Jan → current month)
+
+Category revenue (Phones, Laptops, Power Banks, Smart Watches, etc.)
+
+Lagos vs Abuja region revenue
+
+All charts live-update every 10 seconds
+
+🧠 AI Insights (OpenAI Powered)
+
+Ask natural-language questions:
+
+“Why did revenue increase this month?”
+
+“Predict Lagos sales for next quarter”
+
+“Which product category is underperforming?”
+
 📥 CSV Export (with timestamps)
+
+Export any chart’s dataset with fields:
+
+exported_at, category, revenue
+2025-01-06 14:32, Phones, 120000000
+
 🌙 Dark/Light Mode
-📱 Fully responsive UI for all screens
-🔐 Auth system using Clerk
-🤖 AI Insights page (powered by OpenAI)
-⚡ Zero database — data generated through API + client-side polling
-🎨 Clean, modern UI with smooth interactions
+
+Auto-detects system theme
+Smooth transitions
+Clean UI/UX
+
+📱 Fully Responsive
+
+Optimized for:
+
+Desktop dashboards
+
+Tablets
+
+Mobile scrolling charts (horizontal scroll built-in)
+
+🔐 Authentication
+
+Powered by Clerk (sign-in, sign-out, routing protection)
+
+⚙️ Zero Database
+
+All analytics data is generated dynamically via API routes.
 
 🛠️ Tech Stack
 Frontend
 
 Next.js 14 (App Router)
-React (with Hooks)
+
+React 18 + Hooks
+
 TailwindCSS
-Recharts
-Framer Motion
-Clerk Auth
 
-Backend (Inside Next.js)
+Recharts (interactive charts)
 
-REST API routes for dynamic data generation
-Mock data generator (Node)
+Framer Motion (animations)
+
+Clerk Authentication
+
+Backend
+
+Next.js API Routes
+
+TypeScript
+
+Mock data generators
+
+CSV generation API
 
 AI
 
-OpenAI API for AI Insights page
+OpenAI (gpt-4o-mini)
 
+⚡ Real-Time Architecture (Polling Strategy)
 
-⚡ Real-Time Architecture (Polling-Based)
-This project simulates live analytics using client-side polling with a 10-second refresh interval.
+Instead of WebSockets or SSE, Cyfalytics.io uses client-side polling:
+
 Why Polling?
 
-✅ Simple to implement — no complex WebSocket/SSE setup
-✅ Reliable — works everywhere (no connection persistence issues)
-✅ Efficient for 10s intervals — perfectly acceptable for dashboard use cases
-✅ Easy to debug — standard HTTP requests
+Works everywhere (no persistent connection issues)
 
-How it works
+Zero server complexity
 
-User opens the dashboard
-useEffect hook triggers initial data fetch
-setInterval calls the API every 10 seconds:
+Perfect for 10-second intervals
 
-typescriptuseEffect(() => {
-  setMounted(true);
+Easy to scale on Vercel
+
+Simple debugging
+
+How It Works
+useEffect(() => {
   fetchData();
-  const interval = setInterval(fetchData, 10000); // 10 seconds
+  const interval = setInterval(fetchData, 10000);
   return () => clearInterval(interval);
 }, []);
 
-Charts update automatically with fresh data
-No page refresh needed — feels real-time!
 
-
-📊 Key Features
-🔥 1. Real-Time Charts
-Sales Trend (Jan → Current Month)
-
-Automatically generates data up to today's month
-Updates every 10 seconds
-Scrollable on small screens
-
-Revenue by Category
-
-Power Banks
-Airpods
-Smart Watches
-Phones
-Laptops
-Accessories
-etc.
-
-Region Revenue (Lagos vs Abuja)
-Dynamic weights simulate realistic regional differences.
-
-📥 2. CSV Export
-Every chart can export CSV with:
-
-Timestamp (date + time)
-Source (sales/category/region)
-Raw data values
-
-Example:
-csvexported_at,category,revenue
-2025-01-06 14:32,Phones,120000000
-2025-01-06 14:32,Laptops,98000000
-
-🌙 3. Dark Mode + Clean UI
-The entire dashboard is optimized for:
-
-Smooth animations
-Mobile friendliness
-Elegant spacing
-System theme preference
-
-
-🔐 4. Authentication with Clerk
-Sign in/out flows out of the box.
-
-🤖 5. AI Insights Page
-Uses OpenAI API to summarize metrics & answer business questions.
-Examples:
-
-"Why did sales drop in June?"
-"Predict Lagos vs Abuja revenue for next quarter."
-
+Charts update automatically without page refresh.
 
 📡 API Routes
-RouteMethodDescription/api/salesGETFetch current sales data/api/categoryGETFetch category revenue breakdown/api/regionGETFetch region-based revenue/api/chatPOSTAI Insights (OpenAI)/api/export/csvPOSTCSV export
+Route	Method	Purpose
+/api/sales	GET	Monthly sales trend
+/api/category	GET	Category revenue data
+/api/region	GET	Lagos vs Abuja simulation
+/api/api-keys	POST	AI Insights (OpenAI)
+/api/export/csv	POST	CSV export with timestamp
+📁 Full Project Structure
 
-🧱 Project Structure
+(Updated to match your real files — NOT generic)
+
 src/
- ├─ app/
- │   ├─ dashboard/
- │   │   ├─ charts/
- │   │   ├─ layout.tsx
- │   │   ├─ page.tsx
- │   ├─ api/
- │   │   ├─ sales/route.ts
- │   │   ├─ category/route.ts
- │   │   ├─ region/route.ts
- │   │   ├─ chat/route.ts
- │   │   ├─ export/csv/route.ts
- │   ├─ layout.tsx
- │   ├─ page.tsx
- ├─ components/
- ├─ lib/
- ├─ styles/
+├─ app/
+│  ├─ api/
+│  │  ├─ sales/route.ts
+│  │  ├─ category/route.ts
+│  │  ├─ region/route.ts
+│  │  ├─ chat/route.ts
+│  │
+│  ├─ dashboard/
+│  │  ├─ components/
+│  │  │  ├─ CategoryRevenueChart.tsx
+│  │  │  ├─ RegionRevenueChart.tsx
+│  │  │  ├─ SalesTrendChart.tsx
+│  │  │  
+│  │  ├─ page.tsx
+│  │  └─ layout.tsx
+│  ├─ ai/
+│  │  └─ page.tsx
+│  ├─ layout.tsx
+│  └─ page.tsx
+├─ components/
+│  └─ ui/
+│     ├─ card.tsx
+│     ├─ button.tsx
+│     └─ input.tsx
+├─ lib/
+│  └─ utils.ts
+├─ styles/
+│  └─ globals.css
 
-🧪 Running Locally
-bashgit clone https://github.com/YOUR-USERNAME/cyfalytics-dashboard
-cd cyfalytics-dashboard
+🚀 Deployment (Vercel)
+1️⃣ Push to GitHub
+git add .
+git commit -m "Deploy build"
+git push origin main
+
+2️⃣ Go to Vercel.com → New Project
+3️⃣ Import your GitHub repo
+4️⃣ Add Environment Variables
+
+Under Project → Settings → Environment Variables
+
+Key	Value
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY	from Clerk
+CLERK_SECRET_KEY	from Clerk
+OPENAI_API_KEY	from OpenAI
+
+Click Redeploy.
+
+🧪 Run Locally
+git clone https://github.com/YOUR_USERNAME/Cyfalytics.io.git
+cd cyfalytics
 npm install
 npm run dev
-Open 👉 http://localhost:3000
+
+
+Visit:
+👉 http://localhost:3000
