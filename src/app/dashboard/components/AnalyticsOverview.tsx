@@ -2,8 +2,9 @@
 
 import { OverviewCard } from "./OverviewCard";
 import { RevenueChart } from "./RevenueChart";
-import { TrafficChart } from "./TrafficChart";
+
 import { DollarSign, ShoppingBag, Users, Package } from "lucide-react";
+import SalesCustomersPage from "./SalesCustomersPage";
 
 export function AnalyticsOverview() {
   return (
@@ -18,7 +19,7 @@ export function AnalyticsOverview() {
 
       {/* Charts */}
       <RevenueChart />
-      <TrafficChart />
+      <SalesCustomersPage />
     </div>
   );
 }

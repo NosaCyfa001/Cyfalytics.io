@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, BarChart, Bot, Settings, X } from "lucide-react";
+import { LayoutDashboard, BarChart, Bot, Settings, X, InfoIcon } from "lucide-react";
 import Link from "next/link";
 
 interface SidebarProps {
@@ -24,6 +24,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Sales", href: "/dashboard/sales", icon: BarChart },
     { name: "AI Insights", href: "/dashboard/insights", icon: Bot },
+    { name: "Readme", href: "/dashboard/readme", icon: InfoIcon },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 

@@ -13,10 +13,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Download } from "lucide-react";
 import { useMemo } from "react";
 
-// Define types for tooltip props
+// Define proper types for Recharts tooltip
 interface TooltipPayload {
   value: number;
-  // other properties if needed
+  name: string;
+  dataKey: string;
+  color: string;
 }
 
 interface CustomTooltipProps {
@@ -26,15 +28,23 @@ interface CustomTooltipProps {
 }
 
 export function RevenueChart() {
+  // ✅ Generate last 12 months
   const months = useMemo(() => {
     const now = new Date();
     const monthNames = [
       "Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
-    return monthNames.slice(0, now.getMonth() + 1);
+    
+    const last12Months = [];
+    for (let i = 11; i >= 0; i--) {
+      const monthIndex = (now.getMonth() - i + 12) % 12;
+      last12Months.push(monthNames[monthIndex]);
+    }
+    return last12Months;
   }, []);
 
+  // ✅ Regenerates random data on EVERY render (no useMemo)
   const data = months.map((month) => ({
     month,
     revenue: 100_000_000 + Math.floor(Math.random() * 300_000_000),
@@ -96,6 +106,7 @@ export function RevenueChart() {
           <button
             onClick={handleDownloadCSV}
             className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-medium shadow-sm hover:shadow-md transition-all"
+            aria-label="Export revenue data as CSV"
           >
             <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span className="hidden sm:inline">Export</span>
@@ -114,7 +125,11 @@ export function RevenueChart() {
                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#37415130" />
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="#e5e7eb" 
+                  className="dark:stroke-gray-700" 
+                />
                 <XAxis dataKey="month" stroke="#9ca3af" />
                 <YAxis stroke="#9ca3af" tickFormatter={formatNaira} />
                 <Tooltip content={<CustomTooltip />} />

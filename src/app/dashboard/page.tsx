@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "./components/RevenueChart";
+import SalesCustomersPage from "./components/SalesCustomersPage";
 
 // --- START TYPE DEFINITIONS ---
 
@@ -413,46 +414,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Sales vs Customers */}
-      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-        <CardContent className="p-4 sm:p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-            Sales vs Active Customers
-          </h2>
-          <div className="h-64 sm:h-72 overflow-x-auto">
-            <div style={{ minWidth: "500px", height: "100%" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#37415120" />
-                  <XAxis
-                    dataKey="month"
-                    stroke="#9ca3af"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <YAxis stroke="#9ca3af" style={{ fontSize: "12px" }} />
-                  <Tooltip content={<CustomMultiTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: "12px" }} />
-                  <Line
-                    type="monotone"
-                    dataKey="sales"
-                    stroke="#3b82f6"
-                    strokeWidth={2.5}
-                    dot={false}
-                    name="Sales"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="customers"
-                    stroke="#ec4899"
-                    strokeWidth={2.5}
-                    dot={false}
-                    name="Customers"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <SalesCustomersPage />
     </div>
   );
 }
