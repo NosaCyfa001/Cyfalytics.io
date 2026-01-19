@@ -22,6 +22,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "./components/RevenueChart";
 import SalesCustomersPage from "./components/SalesCustomersPage";
+import {
+  generateTransactions,
+  buildMonthlyAnalytics,
+  addForecast,
+  Transaction as AnalyticsTransaction,
+} from "@/lib/analytics";
+import { SalesChart } from "@/components/SalesChart";
+import { RecentTransactions } from "./components/RecentTransactions";
 
 // --- START TYPE DEFINITIONS ---
 

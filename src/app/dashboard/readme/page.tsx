@@ -360,7 +360,7 @@ export default function ReadmePage() {
               <Package className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 dark:text-yellow-400" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              What's Next?
+              What&apos;s Next?
             </h2>
           </div>
 

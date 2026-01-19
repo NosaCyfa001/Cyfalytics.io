@@ -1,38 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  generateTransactions,
-  buildMonthlyAnalytics,
-  addForecast,
-  Transaction,
-} from "@/lib/analytics";
-import { SalesChart } from "@/components/SalesChart";
-import { RecentTransactions } from "@/components/RecentTransactions";
+import { Transaction } from "@/lib/analytics";
+import { Card } from "@/components/ui/card";
 
-export default function DashboardPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
+interface RecentTransactionsProps {
+  transactions: Transaction[];
+}
 
-  const regenerate = () => {
-    const tx = generateTransactions();
-    const monthly = buildMonthlyAnalytics(tx);
-    setTransactions(tx);
-    setChartData(addForecast(monthly));
-  };
-
-  useEffect(() => {
-    regenerate();
-    const id = setInterval(regenerate, 10_000);
-    return () => clearInterval(id);
-  }, []);
-
+export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="lg:col-span-2">
-        <SalesChart data={chartData} />
+    <Card className="p-6">
+      <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
+      <div className="space-y-3">
+        {transactions.length > 0 ? (
+          transactions.slice(0, 10).map((tx) => (
+            <div
+              key={tx.id}
+              className="flex items-center justify-between border-b pb-3 last:border-b-0"
+            >
+              <div className="flex-1">
+                <p className="text-sm font-medium">{tx.description}</p>
+                <p className="text-xs text-gray-500">{tx.category}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-semibold">${(tx.amount / 100).toFixed(2)}</p>
+                <p className="text-xs text-gray-500">
+                  {new Date(tx.date).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400 text-sm">No transactions yet</p>
+        )}
       </div>
-      <RecentTransactions transactions={transactions} />
-    </div>
+    </Card>
   );
 }
