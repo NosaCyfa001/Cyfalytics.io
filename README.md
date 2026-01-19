@@ -173,7 +173,7 @@ OPENAI_API_KEY	from OpenAI
 Click Redeploy.
 
 🧪 Run Locally
-git clone https://github.com/YOUR_USERNAME/Cyfalytics.io.git
+git clone https://github.com/NosaCyfa001/Cyfalytics.io.git
 cd cyfalytics
 npm install
 npm run dev
