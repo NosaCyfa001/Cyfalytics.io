@@ -9,27 +9,9 @@ import {
   Package,
   RefreshCw,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "./components/RevenueChart";
 import SalesCustomersPage from "./components/SalesCustomersPage";
-import {
-  generateTransactions,
-  buildMonthlyAnalytics,
-  addForecast,
-  Transaction as AnalyticsTransaction,
-} from "@/lib/analytics";
-import { SalesChart } from "@/components/SalesChart";
-import { RecentTransactions } from "./components/RecentTransactions";
 
 // --- START TYPE DEFINITIONS ---
 
@@ -56,24 +38,6 @@ interface Transaction {
   status: "paid" | "pending" | "refunded";
   product?: string;
   paymentMethod?: string;
-}
-
-// Recharts Tooltip Payload Types
-interface TooltipPayload {
-  active?: boolean;
-  payload?: Array<{
-    value: number | string;
-    name: string;
-    color: string;
-  }>;
-  label?: string;
-}
-
-interface MonthlyDataPoint {
-  month: string;
-  revenue: number;
-  sales: number;
-  customers: number;
 }
 
 // --- END TYPE DEFINITIONS ---
@@ -160,63 +124,6 @@ export default function DashboardPage() {
     } finally {
       setRefreshing(false);
     }
-  };
-
-  // Generate data from Jan to current month
-  const generateMonthlyData = (): MonthlyDataPoint[] => {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const currentMonth = new Date().getMonth();
-    const baseRevenue = 6400000;
-    const baseSales = 350;
-    const baseCustomers = 240;
-
-    return months.slice(0, currentMonth + 1).map((month, index) => {
-      const growthFactor = 1 + index * 0.15 * (Math.random() * 0.2 + 0.9); // Slight randomization for realism
-      return {
-        month,
-        revenue: Math.round(baseRevenue * growthFactor),
-        sales: Math.round(
-          baseSales * (1 + index * 0.12 * (Math.random() * 0.2 + 0.9))
-        ),
-        customers: Math.round(
-          baseCustomers * (1 + index * 0.14 * (Math.random() * 0.2 + 0.9))
-        ),
-      };
-    });
-  };
-
-  const monthlyData = generateMonthlyData();
-
-  // Custom Tooltip for the Sales vs Customers Chart
-  const CustomMultiTooltip = ({ active, payload, label }: TooltipPayload) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-            {label}
-          </p>
-          {payload.map((entry, index) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
   };
 
   const getStatusColor = (status: string) => {
