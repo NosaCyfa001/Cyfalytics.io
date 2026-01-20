@@ -2,8 +2,15 @@
 
 import { Card } from "@/components/ui/card";
 
+// ✅ Define proper type instead of 'any'
+interface MonthData {
+  month: string;
+  revenue: number;
+  isForecast?: boolean;
+}
+
 interface SalesChartProps {
-  data: any[];
+  data: MonthData[];
 }
 
 export function SalesChart({ data }: SalesChartProps) {

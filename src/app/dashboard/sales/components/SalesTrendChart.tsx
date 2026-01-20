@@ -138,7 +138,7 @@ export function SalesTrendChart(): JSX.Element {
   function CustomTooltip({
     active,
     payload,
-    label,
+    
   }: {
     active?: boolean;
     payload?: TooltipPayload[];

@@ -10,6 +10,7 @@ export interface MonthlyAnalytics {
   month: string;
   revenue: number;
   transactions: number;
+  isForecast?: boolean; // ✅ Added optional forecast flag
 }
 
 export function generateTransactions(count: number = 50): Transaction[] {
@@ -54,21 +55,27 @@ export function buildMonthlyAnalytics(transactions: Transaction[]): MonthlyAnaly
   );
 }
 
-export function addForecast(analytics: MonthlyAnalytics[]): any[] {
+// ✅ Fixed: Changed return type from 'any[]' to 'MonthlyAnalytics[]'
+export function addForecast(analytics: MonthlyAnalytics[]): MonthlyAnalytics[] {
   if (analytics.length === 0) return [];
 
   const avgRevenue =
     analytics.reduce((sum, a) => sum + a.revenue, 0) / analytics.length;
   const lastMonth = analytics[analytics.length - 1];
 
-  const forecast = {
-    month: new Date(lastMonth.month + "-01").toISOString().slice(0, 7),
+  // ✅ Parse the month string correctly
+  const lastMonthDate = new Date(lastMonth.month + "-01");
+  const nextMonth = new Date(lastMonthDate);
+  nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+  const forecast: MonthlyAnalytics = {
+    month: nextMonth.toISOString().slice(0, 7),
     revenue: Math.round(avgRevenue),
     transactions: Math.round(
       analytics.reduce((sum, a) => sum + a.transactions, 0) /
         analytics.length
     ),
-    isForecast: true,
+    isForecast: true, // ✅ Now properly typed
   };
 
   return [...analytics, forecast];
