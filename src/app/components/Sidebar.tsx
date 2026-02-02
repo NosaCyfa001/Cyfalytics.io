@@ -9,7 +9,6 @@ import {
   Settings,
   X,
   InfoIcon,
-  BellDotIcon,
   BellIcon,
 } from "lucide-react";
 import Link from "next/link";

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 
 interface Notification {
@@ -100,7 +100,10 @@ class WebSocketManager {
     this.url = url;
   }
 
-  connect(onMessage: (data: any) => void, onError: (error: string) => void) {
+  connect(
+    onMessage: (data: SalesData) => void,
+    onError: (error: string) => void
+  ): void {
     try {
       this.ws = new WebSocket(this.url);
 
@@ -109,9 +112,9 @@ class WebSocketManager {
         this.reconnectAttempts = 0;
       };
 
-      this.ws.onmessage = (event) => {
+      this.ws.onmessage = (event: MessageEvent<string>) => {
         try {
-          const data = JSON.parse(event.data);
+          const data: SalesData = JSON.parse(event.data);
           onMessage(data);
         } catch (e) {
           console.error("Failed to parse WebSocket message:", e);
@@ -131,7 +134,10 @@ class WebSocketManager {
     }
   }
 
-  private reconnect(onMessage: (data: any) => void, onError: (error: string) => void) {
+  private reconnect(
+    onMessage: (data: SalesData) => void,
+    onError: (error: string) => void
+  ): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       setTimeout(() => {
@@ -142,7 +148,7 @@ class WebSocketManager {
     }
   }
 
-  disconnect() {
+  disconnect(): void {
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -206,55 +212,14 @@ const generateNotificationsFromDelta = (
 
 export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [preferences, setPreferences] = useState<NotificationPreferences>(
+  const [preferences] = useState<NotificationPreferences>(
     storage.getPreferences()
   );
   const wsRef = useRef<WebSocketManager | null>(null);
   const lastSalesDataRef = useRef<SalesData | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize from localStorage and WebSocket
-  useEffect(() => {
-    const saved = storage.getNotifications();
-    setNotifications(saved);
-
-    initializeConnections();
-
-    return () => {
-      if (wsRef.current) wsRef.current.disconnect();
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    };
-  }, []);
-
-  const initializeConnections = () => {
-    const wsUrl = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/api/sales-ws`;
-    wsRef.current = new WebSocketManager(wsUrl);
-    wsRef.current.connect(
-      (data) => handleSalesUpdate(data),
-      (error) => {
-        console.log(error);
-        initializePolling();
-      }
-    );
-  };
-
-  const initializePolling = () => {
-    const fetchSalesData = async () => {
-      try {
-        const response = await fetch("/api/sales");
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data: SalesData = await response.json();
-        handleSalesUpdate(data);
-      } catch (error) {
-        console.error("Failed to fetch sales data:", error);
-      }
-    };
-
-    fetchSalesData();
-    pollIntervalRef.current = setInterval(fetchSalesData, 30000);
-  };
-
-  const handleSalesUpdate = (salesData: SalesData) => {
+  const handleSalesUpdate = useCallback((salesData: SalesData) => {
     const newNotifications = generateNotificationsFromDelta(
       lastSalesDataRef.current,
       salesData,
@@ -277,9 +242,49 @@ export function NotificationBell() {
     }
 
     lastSalesDataRef.current = salesData;
-  };
+  }, [preferences]);
 
-  const playNotificationSound = () => {
+  const initializePolling = useCallback(() => {
+    const fetchSalesData = async (): Promise<void> => {
+      try {
+        const response = await fetch("/api/sales");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data: SalesData = await response.json();
+        handleSalesUpdate(data);
+      } catch (error) {
+        console.error("Failed to fetch sales data:", error);
+      }
+    };
+
+    fetchSalesData();
+    pollIntervalRef.current = setInterval(fetchSalesData, 30000);
+  }, [handleSalesUpdate]);
+
+  const initializeConnections = useCallback(() => {
+    const wsUrl = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/api/sales-ws`;
+    wsRef.current = new WebSocketManager(wsUrl);
+    wsRef.current.connect(
+      (data) => handleSalesUpdate(data),
+      () => {
+        initializePolling();
+      }
+    );
+  }, [handleSalesUpdate, initializePolling]);
+
+  // Initialize from localStorage and WebSocket
+  useEffect(() => {
+    const saved = storage.getNotifications();
+    setNotifications(saved);
+
+    initializeConnections();
+
+    return () => {
+      if (wsRef.current) wsRef.current.disconnect();
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, [initializeConnections]);
+
+  const playNotificationSound = (): void => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
@@ -301,7 +306,7 @@ export function NotificationBell() {
     }
   };
 
-  const markAsRead = (id: string) => {
+  const markAsRead = (id: string): void => {
     setNotifications((prev) => {
       const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n));
       storage.saveNotifications(updated);
@@ -309,7 +314,7 @@ export function NotificationBell() {
     });
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = (): void => {
     setNotifications((prev) => {
       const updated = prev.map((n) => ({ ...n, read: true }));
       storage.saveNotifications(updated);
@@ -317,7 +322,7 @@ export function NotificationBell() {
     });
   };
 
-  const deleteNotification = (id: string) => {
+  const deleteNotification = (id: string): void => {
     setNotifications((prev) => {
       const updated = prev.filter((n) => n.id !== id);
       storage.saveNotifications(updated);
