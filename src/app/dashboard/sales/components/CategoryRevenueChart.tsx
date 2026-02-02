@@ -51,7 +51,7 @@ export function CategoryRevenueChart() {
 
   useEffect(() => {
     fetchCategoryData();
-    const interval = setInterval(fetchCategoryData, 10_000); // refresh every 10 s
+    const interval = setInterval(fetchCategoryData, 60_000); // refresh every 60s
     return () => clearInterval(interval);
   }, []);
 

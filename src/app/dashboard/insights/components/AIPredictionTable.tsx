@@ -14,10 +14,9 @@ export function AIPredictionTable() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Generate predictions only on mount
   useEffect(() => {
     generatePredictions();
-    const interval = setInterval(generatePredictions, 10000);
-    return () => clearInterval(interval);
   }, []);
 
   const formatNaira = (value: number) => {
@@ -93,8 +92,8 @@ export function AIPredictionTable() {
           </div>
           <div className="flex items-center gap-2">
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Live</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+              <span className="text-xs font-medium text-blue-700 dark:text-blue-300">On-Demand</span>
             </div>
             <button
               onClick={generatePredictions}
@@ -166,7 +165,7 @@ export function AIPredictionTable() {
 
         <div className="px-4 sm:px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            Predictions generated dynamically • Next update in 10s
+            Predictions generated on-demand • Click refresh to regenerate
           </p>
         </div>
       </CardContent>

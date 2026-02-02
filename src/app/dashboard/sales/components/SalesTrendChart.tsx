@@ -32,7 +32,7 @@ export function SalesTrendChart(): JSX.Element {
   const [apiData, setApiData] = useState<SalesPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const POLL_INTERVAL_MS = 10_000; // 10s
+  const POLL_INTERVAL_MS = 60_000; // 60s
 
   async function fetchSalesTrend(): Promise<void> {
     setLoading(true);

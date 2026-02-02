@@ -38,7 +38,7 @@ interface PieLabelProps {
   percent?: number;
 }
 
-const POLL_INTERVAL_MS = 10_000; // 10s
+const POLL_INTERVAL_MS = 60_000; // 60s
 
 export default function SalesPage(): JSX.Element {
   const [salesData, setSalesData] = useState<SalesData | null>(null);

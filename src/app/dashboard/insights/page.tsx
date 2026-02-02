@@ -38,11 +38,11 @@ export default function InsightsPage() {
   const [loading, setLoading] = useState(false);
   const [salesData, setSalesData] = useState<SalesData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
+  // Fetch on-demand only when page first loads or user clicks refresh
   useEffect(() => {
     fetchSalesData();
-    const interval = setInterval(fetchSalesData, 10000);
-    return () => clearInterval(interval);
   }, []);
 
   const fetchSalesData = async () => {
@@ -52,6 +52,7 @@ export default function InsightsPage() {
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setSalesData(data);
+      setDataLoaded(true);
     } catch (err) {
       console.error("Error fetching sales:", err);
     } finally {
@@ -62,6 +63,11 @@ export default function InsightsPage() {
   const handleAskAI = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+
+    // Fetch fresh data when user asks a question
+    if (!dataLoaded) {
+      await fetchSalesData();
+    }
 
     const userMessage = input.trim();
     setInput("");
@@ -166,6 +172,7 @@ export default function InsightsPage() {
             disabled={refreshing}
             className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
             aria-label="Refresh data"
+            title="Fetch latest data"
           >
             <RefreshCw
               className={`w-4 h-4 text-gray-600 dark:text-gray-400 ${
@@ -232,7 +239,7 @@ export default function InsightsPage() {
       </div>
 
       {/* AI Predictions Table */}
-      <AIPredictionTable />
+      {salesData && <AIPredictionTable />}
 
       {/* AI Chat Interface */}
       <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm flex flex-col">
