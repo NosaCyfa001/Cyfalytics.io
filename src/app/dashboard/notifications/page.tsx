@@ -12,6 +12,8 @@ import {
   X,
   Settings,
   Mail,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 interface Notification {
@@ -136,6 +138,7 @@ class WebSocketManager {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 3000;
   private reconnectTimeout: NodeJS.Timeout | null = null;
+  private isManuallyDisconnected = false;
 
   constructor(url: string) {
     this.url = url;
@@ -145,6 +148,8 @@ class WebSocketManager {
     onMessage: (data: SalesData) => void,
     onError: (error: string) => void,
   ): void {
+    if (this.isManuallyDisconnected) return;
+
     try {
       this.ws = new WebSocket(this.url);
 
@@ -163,16 +168,22 @@ class WebSocketManager {
       };
 
       this.ws.onerror = (): void => {
-        this.reconnect(onMessage, onError);
+        if (!this.isManuallyDisconnected) {
+          this.reconnect(onMessage, onError);
+        }
       };
 
       this.ws.onclose = (): void => {
         console.log("WebSocket closed");
-        this.reconnect(onMessage, onError);
+        if (!this.isManuallyDisconnected) {
+          this.reconnect(onMessage, onError);
+        }
       };
     } catch (error) {
       onError("Failed to connect WebSocket");
-      this.reconnect(onMessage, onError);
+      if (!this.isManuallyDisconnected) {
+        this.reconnect(onMessage, onError);
+      }
     }
   }
 
@@ -180,6 +191,8 @@ class WebSocketManager {
     onMessage: (data: SalesData) => void,
     onError: (error: string) => void,
   ): void {
+    if (this.isManuallyDisconnected) return;
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       this.reconnectTimeout = setTimeout(() => {
@@ -192,6 +205,8 @@ class WebSocketManager {
   }
 
   disconnect(): void {
+    this.isManuallyDisconnected = true;
+
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
@@ -217,7 +232,7 @@ const generateNotificationsFromDelta = (
 ): Notification[] => {
   const notifications: Notification[] = [];
 
-  if (!oldData) return []; // Skip on first load
+  if (!oldData || !preferences.enabled) return [];
 
   const revenueDelta =
     newData.summary.totalRevenue - oldData.summary.totalRevenue;
@@ -226,7 +241,7 @@ const generateNotificationsFromDelta = (
   // High revenue delta
   if (preferences.sales && revenueDelta > 1000000) {
     notifications.push({
-      id: `sale-delta-${Date.now()}`,
+      id: `sale-delta-${Date.now()}-${Math.random()}`,
       title: "New Sales! 🚀",
       message: `₦${(revenueDelta / 1_000_000).toFixed(1)}M in new revenue`,
       time: new Date().toLocaleTimeString([], {
@@ -242,7 +257,7 @@ const generateNotificationsFromDelta = (
   // New orders
   if (preferences.orders && ordersDelta > 0) {
     notifications.push({
-      id: `orders-delta-${Date.now()}`,
+      id: `orders-delta-${Date.now()}-${Math.random()}`,
       title: `${ordersDelta} New Order${ordersDelta > 1 ? "s" : ""} 📦`,
       message: `${ordersDelta} new order${ordersDelta > 1 ? "s" : ""} received`,
       time: new Date().toLocaleTimeString([], {
@@ -264,7 +279,7 @@ const generateNotificationsFromDelta = (
       const regionRevenueDelta = newRegion.revenue - oldRegion.revenue;
       if (preferences.alerts && regionRevenueDelta > 500000) {
         notifications.push({
-          id: `region-delta-${newRegion.region}-${Date.now()}`,
+          id: `region-delta-${newRegion.region}-${Date.now()}-${Math.random()}`,
           title: `${newRegion.region} Activity 📍`,
           message: `+₦${(regionRevenueDelta / 1_000_000).toFixed(1)}M in ${newRegion.region}`,
           time: new Date().toLocaleTimeString([], {
@@ -297,16 +312,68 @@ export default function NotificationsPage() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const preferencesRef = useRef<NotificationPreferences>(preferences);
   const toastTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const processingUpdateRef = useRef(false);
+  const activeOscillatorsRef = useRef<Set<OscillatorNode>>(new Set());
+
   // Update preferences ref whenever preferences change
   useEffect(() => {
     preferencesRef.current = preferences;
   }, [preferences]);
 
+  // Cleanup audio context and stop all sounds on unmount or when sound is disabled
+  useEffect(() => {
+    return () => {
+      // Stop all active oscillators
+      activeOscillatorsRef.current.forEach((oscillator) => {
+        try {
+          oscillator.stop();
+        } catch (e) {
+          // Oscillator might already be stopped
+        }
+      });
+      activeOscillatorsRef.current.clear();
+
+      // Close audio context
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  // Stop all sounds when sound preference is turned off
+  useEffect(() => {
+    if (!preferences.sound) {
+      // Stop all currently playing sounds
+      activeOscillatorsRef.current.forEach((oscillator) => {
+        try {
+          oscillator.stop();
+        } catch (e) {
+          // Oscillator might already be stopped
+        }
+      });
+      activeOscillatorsRef.current.clear();
+
+      // Close and reset audio context
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+    }
+  }, [preferences.sound]);
+
   const playNotificationSound = useCallback((): void => {
+    // Don't play if sound is disabled
+    if (!preferencesRef.current.sound) return;
+
     try {
-      const audioContext = new (
-        window.AudioContext || (window as any).webkitAudioContext
-      )();
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (
+          window.AudioContext || (window as any).webkitAudioContext
+        )();
+      }
+
+      const audioContext = audioContextRef.current;
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -322,8 +389,16 @@ export default function NotificationsPage() {
         audioContext.currentTime + 0.1,
       );
 
+      // Track active oscillator
+      activeOscillatorsRef.current.add(oscillator);
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.1);
+
+      // Remove from active set after it stops
+      oscillator.onended = () => {
+        activeOscillatorsRef.current.delete(oscillator);
+      };
     } catch (e) {
       console.error("Failed to play notification sound:", e);
     }
@@ -331,7 +406,7 @@ export default function NotificationsPage() {
 
   const showToast = useCallback(
     (title: string, message: string, type: Toast["type"]): void => {
-      const id = Date.now().toString();
+      const id = `${Date.now()}-${Math.random()}`;
       const toast: Toast = { id, title, message, type };
       setToasts((prev) => [...prev, toast]);
 
@@ -347,33 +422,49 @@ export default function NotificationsPage() {
 
   const handleSalesUpdate = useCallback(
     (salesData: SalesData): void => {
-      const newNotifications = generateNotificationsFromDelta(
-        lastSalesDataRef.current,
-        salesData,
-        preferencesRef.current,
-      );
+      // Prevent concurrent processing
+      if (processingUpdateRef.current) return;
+      processingUpdateRef.current = true;
 
-      if (newNotifications.length > 0) {
-        setNotifications((prev) => {
-          const filtered = newNotifications.filter(
-            (n) => !prev.some((existing) => existing.id === n.id),
-          );
-          return [...filtered, ...prev];
-        });
+      try {
+        const newNotifications = generateNotificationsFromDelta(
+          lastSalesDataRef.current,
+          salesData,
+          preferencesRef.current,
+        );
 
-        newNotifications.forEach((n) => {
-          showToast(n.title, n.message, n.type);
-          if (preferencesRef.current.sound) playNotificationSound();
-        });
+        if (newNotifications.length > 0) {
+          setNotifications((prev) => {
+            const filtered = newNotifications.filter(
+              (n) => !prev.some((existing) => existing.id === n.id),
+            );
+            return [...filtered, ...prev];
+          });
+
+          newNotifications.forEach((n) => {
+            showToast(n.title, n.message, n.type);
+            // Only play sound if enabled
+            if (preferencesRef.current.sound && preferencesRef.current.enabled) {
+              playNotificationSound();
+            }
+          });
+        }
+
+        lastSalesDataRef.current = salesData;
+        storage.setLastSync(salesData.timestamp);
+      } finally {
+        processingUpdateRef.current = false;
       }
-
-      lastSalesDataRef.current = salesData;
-      storage.setLastSync(salesData.timestamp);
     },
     [showToast, playNotificationSound],
   );
 
   const initializePolling = useCallback((): void => {
+    // Clear any existing interval
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+    }
+
     const fetchSalesData = async (): Promise<void> => {
       try {
         const response = await fetch("/api/sales");
@@ -389,25 +480,6 @@ export default function NotificationsPage() {
     pollIntervalRef.current = setInterval(fetchSalesData, 30000);
   }, [handleSalesUpdate]);
 
-  const initializeWebSocket = useCallback((): void => {
-    if (typeof window === "undefined") return;
-
-    const wsUrl = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/api/sales-ws`;
-    wsRef.current = new WebSocketManager(wsUrl);
-    wsRef.current.connect(
-      (data) => {
-        setWsConnected(true);
-        handleSalesUpdate(data);
-      },
-      (error) => {
-        setWsError(error);
-        setWsConnected(false);
-        initializePolling();
-      },
-    );
-    setWsConnected(true);
-  }, [handleSalesUpdate, initializePolling]);
-
   // Load from storage on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -421,21 +493,45 @@ export default function NotificationsPage() {
 
   // Initialize connections once on mount
   useEffect(() => {
-    initializeWebSocket();
+    if (typeof window === "undefined") return;
+
+    const wsUrl = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/api/sales-ws`;
+    wsRef.current = new WebSocketManager(wsUrl);
+
+    wsRef.current.connect(
+      (data) => {
+        setWsConnected(true);
+        setWsError(null);
+        handleSalesUpdate(data);
+      },
+      (error) => {
+        setWsError(error);
+        setWsConnected(false);
+        initializePolling();
+      },
+    );
 
     return () => {
-      if (wsRef.current) wsRef.current.disconnect();
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      if (wsRef.current) {
+        wsRef.current.disconnect();
+      }
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
       // Clear all toast timers
       toastTimersRef.current.forEach((timer) => clearTimeout(timer));
       toastTimersRef.current.clear();
     };
-  }, [initializeWebSocket]);
+  }, [handleSalesUpdate, initializePolling]);
 
-  // Save notifications whenever they change
+  // Save notifications whenever they change (with debounce)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      storage.saveNotifications(notifications);
+      const timer = setTimeout(() => {
+        storage.saveNotifications(notifications);
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
   }, [notifications]);
 
@@ -446,38 +542,46 @@ export default function NotificationsPage() {
     }
   }, [preferences]);
 
-  const markAsRead = (id: string): void => {
+  const markAsRead = useCallback((id: string): void => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
     );
-  };
+  }, []);
 
-  const markAllAsRead = (): void => {
+  const markAllAsRead = useCallback((): void => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+  }, []);
 
-  const deleteNotification = (id: string): void => {
+  const deleteNotification = useCallback((id: string): void => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
+  }, []);
 
-  const deleteAll = (): void => {
+  const deleteAll = useCallback((): void => {
     if (confirm("Delete all notifications?")) {
       setNotifications([]);
     }
-  };
+  }, []);
 
-  const updatePreferences = (key: keyof NotificationPreferences): void => {
-    setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const updatePreferences = useCallback(
+    (key: keyof NotificationPreferences): void => {
+      setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
+    },
+    [],
+  );
 
-  const removeToast = (id: string): void => {
+  const removeToast = useCallback((id: string): void => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
     const timer = toastTimersRef.current.get(id);
     if (timer) {
       clearTimeout(timer);
       toastTimersRef.current.delete(id);
     }
-  };
+  }, []);
+
+  // Test sound function
+  const testSound = useCallback((): void => {
+    playNotificationSound();
+  }, [playNotificationSound]);
 
   const getNotificationStyle = (type: string) => {
     switch (type) {
@@ -548,6 +652,7 @@ export default function NotificationsPage() {
                 <button
                   onClick={() => removeToast(toast.id)}
                   className="flex-shrink-0 opacity-70 hover:opacity-100"
+                  aria-label="Close notification"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -617,7 +722,8 @@ export default function NotificationsPage() {
           {/* Connection Status */}
           <div className="mb-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
             <span
-              className={`inline-block w-2 h-2 rounded-full animate-pulse ${wsConnected ? "bg-green-500" : "bg-amber-500"}`}
+              className={`inline-block w-2 h-2 rounded-full ${wsConnected ? "bg-green-500 animate-pulse" : "bg-amber-500"}`}
+              aria-label={wsConnected ? "Connected" : "Disconnected"}
             ></span>
             {wsConnected
               ? "Live (WebSocket)"
@@ -638,7 +744,7 @@ export default function NotificationsPage() {
                     type="checkbox"
                     checked={preferences.enabled}
                     onChange={() => updatePreferences("enabled")}
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded border-gray-300"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     Enable notifications
@@ -649,9 +755,12 @@ export default function NotificationsPage() {
                     type="checkbox"
                     checked={preferences.sales}
                     onChange={() => updatePreferences("sales")}
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded border-gray-300"
+                    disabled={!preferences.enabled}
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span
+                    className={`text-sm ${!preferences.enabled ? "opacity-50" : "text-gray-700 dark:text-gray-300"}`}
+                  >
                     🎉 Sales alerts
                   </span>
                 </label>
@@ -660,9 +769,12 @@ export default function NotificationsPage() {
                     type="checkbox"
                     checked={preferences.alerts}
                     onChange={() => updatePreferences("alerts")}
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded border-gray-300"
+                    disabled={!preferences.enabled}
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span
+                    className={`text-sm ${!preferences.enabled ? "opacity-50" : "text-gray-700 dark:text-gray-300"}`}
+                  >
                     ⚠️ Stock alerts
                   </span>
                 </label>
@@ -671,21 +783,50 @@ export default function NotificationsPage() {
                     type="checkbox"
                     checked={preferences.orders}
                     onChange={() => updatePreferences("orders")}
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded border-gray-300"
+                    disabled={!preferences.enabled}
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span
+                    className={`text-sm ${!preferences.enabled ? "opacity-50" : "text-gray-700 dark:text-gray-300"}`}
+                  >
                     📦 Order notifications
                   </span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer pt-2 border-t border-gray-200 dark:border-gray-700">
-                  
+                  <input
+                    type="checkbox"
+                    checked={preferences.sound}
+                    onChange={() => updatePreferences("sound")}
+                    className="w-4 h-4 rounded border-gray-300"
+                    disabled={!preferences.enabled}
+                  />
+                  <span
+                    className={`text-sm flex items-center gap-2 ${!preferences.enabled ? "opacity-50" : "text-gray-700 dark:text-gray-300"}`}
+                  >
+                    {preferences.sound ? (
+                      <Volume2 className="h-4 w-4" />
+                    ) : (
+                      <VolumeX className="h-4 w-4" />
+                    )}
+                    Sound alerts
+                  </span>
+                  {preferences.sound && preferences.enabled && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={testSound}
+                      className="ml-auto text-xs px-2 py-1 h-auto"
+                    >
+                      Test
+                    </Button>
+                  )}
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={preferences.email}
                     onChange={() => updatePreferences("email")}
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded border-gray-300"
                     disabled
                   />
                   <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 opacity-50">
