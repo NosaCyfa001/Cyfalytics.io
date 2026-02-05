@@ -368,9 +368,8 @@ export default function NotificationsPage() {
 
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (
-          window.AudioContext || (window as any).webkitAudioContext
-        )();
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass();
       }
 
       const audioContext = audioContextRef.current;
