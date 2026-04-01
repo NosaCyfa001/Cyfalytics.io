@@ -8,7 +8,7 @@ Cyfalytics.io delivers beautiful charts, real-time data simulation, AI-powered i
 ✨ Features
 📊 Real-Time Analytics (10-second polling)
 
-Sales trend chart (Jan → current month)
+Sales trend chart 
 
 Category revenue (Phones, Laptops, Power Banks, Smart Watches, etc.)
 
